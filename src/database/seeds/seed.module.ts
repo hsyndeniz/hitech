@@ -6,8 +6,14 @@ import databaseConfig from 'src/config/database.config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { TypeOrmConfigService } from '../typeorm-config.service';
 
+import { GenreSeedModule } from './genre/genre-seed.module';
+
+import { MovieSeedModule } from './movie/movie-seed.module';
+
 @Module({
   imports: [
+    MovieSeedModule,
+    GenreSeedModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, appConfig],
