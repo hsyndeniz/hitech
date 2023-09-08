@@ -1,11 +1,14 @@
 services:
   postgres:
-    image: postgres:15.4-alpine
+    image: postgres:latest
+    container_name: postgres
+    hostname: postgres
     ports:
       - ${DATABASE_PORT}:5432
     volumes:
-      - boilerplate-db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
     environment:
+      PGUSER: ${DATABASE_USERNAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
@@ -38,4 +41,4 @@ services:
       - ${APP_PORT}:${APP_PORT}
 
 volumes:
-  boilerplate-db:
+  db:
