@@ -1,11 +1,14 @@
 services:
   postgres:
-    image: postgres:15.4-alpine
+    image: postgres:latest
+    container_name: postgres
+    hostname: postgres
+    ports:
+      - ${DATABASE_PORT}:5432
     volumes:
-      - boilerplate-db:/var/lib/postgresql/data
-    expose:
-      - 5432
+      - db:/var/lib/postgresql/data
     environment:
+      PGUSER: ${DATABASE_USERNAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
@@ -14,21 +17,28 @@ services:
     build:
       context: .
       dockerfile: maildev.Dockerfile
-    expose:
-      - 1080
-      - 1025
+    ports:
+      - ${MAIL_CLIENT_PORT}:1080
+      - ${MAIL_PORT}:1025
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
 
   # Uncomment to use redis
   # redis:
   #   image: redis:7-alpine
-  #   expose:
-  #     - 6379
+  #   ports:
+  #     - 6379:6379
 
   api:
     build:
       context: .
-      dockerfile: e2e.Dockerfile
-
+      dockerfile: Dockerfile
+    ports:
+      - ${APP_PORT}:${APP_PORT}
 
 volumes:
-  boilerplate-db:
+  db:
