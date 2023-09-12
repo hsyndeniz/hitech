@@ -1,0 +1,28 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Genre {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique @db.VarChar(255)
+  movies Movie[] @relation("movies")
+
+  @@map("genre")
+}
+
+model Movie {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String   @db.VarChar(2000)
+  releaseDate DateTime @map("release_date") @db.Timestamp(6)
+  genreId     Int      @map("genre_id")
+  genre       Genre    @relation("movies", fields: [genreId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("movie")
+}
