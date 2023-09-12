@@ -11,14 +11,13 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { DeleteResult } from 'typeorm';
+import { Genre } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
-import { Genre } from './entities/genre.entity';
 import { GenresService } from './genres.service';
 import { CreateGenreDto } from './dto/create-genre.dto';
+import { NullableType } from 'src/utils/types/nullable.type';
 import { infinityPagination } from 'src/utils/infinity-pagination';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { NullableType } from 'src/utils/types/nullable.type';
 
 @ApiTags('Genres')
 @Controller({
@@ -30,8 +29,8 @@ export class GenresController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createGenreDto: CreateGenreDto): Promise<Genre> {
-    return this.genresService.create(createGenreDto);
+  create(@Body() genre: CreateGenreDto): Promise<Genre> {
+    return this.genresService.create(genre.name);
   }
 
   @Get()
@@ -56,12 +55,12 @@ export class GenresController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: number): Promise<NullableType<Genre>> {
-    return this.genresService.findOne({ id });
+    return this.genresService.findOne(id);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: number): Promise<DeleteResult> {
+  remove(@Param('id') id: number): Promise<any> {
     return this.genresService.remove(id);
   }
 }
