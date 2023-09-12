@@ -21,4 +21,4 @@ DATABASE_CA=
 DATABASE_KEY=
 DATABASE_CERT=
 
-DATABASE_URL="postgresql://api:secret@localhost:5432/api?schema=public"
+DATABASE_URL="postgresql://api:secret@postgres:5432/api?schema=public"
