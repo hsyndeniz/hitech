@@ -1,62 +1,78 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Like, Repository, UpdateResult } from 'typeorm';
-import { Movie } from './entities/movie.entity';
+import { NullableType } from 'src/utils/types/nullable.type';
+import { IPaginationOptions } from 'src/utils/types/pagination-options';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Movie } from '@prisma/client';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
-import { NullableType } from 'src/utils/types/nullable.type';
-import { EntityCondition } from 'src/utils/types/entity-condition.type';
-import { IPaginationOptions } from 'src/utils/types/pagination-options';
 
 @Injectable()
 export class MoviesService {
-  constructor(
-    @InjectRepository(Movie)
-    private movieRepository: Repository<Movie>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  create(createMovieDto: CreateMovieDto): Promise<Movie> {
-    return this.movieRepository.save(
-      this.movieRepository.create(createMovieDto),
-    );
+  create(data: CreateMovieDto): Promise<Movie> {
+    return this.prisma.movie.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        releaseDate: data.releaseDate,
+        genre: {
+          connect: {
+            id: data.genre,
+          },
+        },
+      },
+    });
   }
 
   findAll(paginationOptions: IPaginationOptions): Promise<Movie[]> {
-    return this.movieRepository.find({
+    return this.prisma.movie.findMany({
       skip: (paginationOptions.page - 1) * paginationOptions.limit,
       take: paginationOptions.limit,
     });
   }
 
-  findOne(fields: EntityCondition<Movie>): Promise<NullableType<Movie>> {
-    return this.movieRepository.findOne({
-      where: fields,
+  findOne(id: number): Promise<NullableType<Movie>> {
+    return this.prisma.movie.findUnique({
+      where: { id },
     });
   }
 
   searchByTitle(title: string): Promise<Movie[]> {
-    return this.movieRepository.find({
+    return this.prisma.movie.findMany({
       where: {
-        title: Like(`%${title}%`),
+        title: {
+          search: title,
+        },
       },
     });
   }
 
-  searchByGenre(genre: number, paginationOptions: IPaginationOptions) {
-    return this.movieRepository.find({
+  searchByGenre(genre: number, options: IPaginationOptions): Promise<Movie[]> {
+    return this.prisma.movie.findMany({
       where: {
-        genre,
+        genreId: genre,
       },
-      skip: (paginationOptions.page - 1) * paginationOptions.limit,
-      take: paginationOptions.limit,
+      skip: (options.page - 1) * options.limit,
+      take: options.limit,
     });
   }
 
-  update(id: number, updateMovieDto: UpdateMovieDto): Promise<UpdateResult> {
-    return this.movieRepository.update(id, updateMovieDto);
+  update(id: number, data: UpdateMovieDto): Promise<Movie> {
+    return this.prisma.movie.update({
+      where: { id },
+      data: {
+        title: data.title,
+        description: data.description,
+        releaseDate: data.releaseDate,
+        genreId: data.genre,
+      },
+    });
   }
 
-  remove(id: Movie['id']): Promise<DeleteResult> {
-    return this.movieRepository.delete(id);
+  remove(id: Movie['id']): Promise<any> {
+    return this.prisma.movie.delete({
+      where: { id },
+    });
   }
 }

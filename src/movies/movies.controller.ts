@@ -13,14 +13,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { DeleteResult, UpdateResult } from 'typeorm';
-import { Movie } from './entities/movie.entity';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { infinityPagination } from 'src/utils/infinity-pagination';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
+import { Movie } from '@prisma/client';
 
 @ApiTags('Movies')
 @Controller({
@@ -58,7 +57,7 @@ export class MoviesController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: number): Promise<NullableType<Movie>> {
-    return this.moviesService.findOne({ id });
+    return this.moviesService.findOne(id);
   }
 
   @Get('search/:title')
@@ -92,13 +91,13 @@ export class MoviesController {
   update(
     @Param('id') id: string,
     @Body() updateMovieDto: UpdateMovieDto,
-  ): Promise<UpdateResult> {
+  ): Promise<Movie> {
     return this.moviesService.update(+id, updateMovieDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: number): Promise<DeleteResult> {
-    return this.moviesService.remove(+id);
+  remove(@Param('id') id: number): Promise<any> {
+    return this.moviesService.remove(id);
   }
 }
